@@ -37,5 +37,7 @@ def read_lists_from_json():
         json_load = json.load(input_file)
     return json_load
 
+
 def get_movies(list_url):
     html = get_url_content(list_url)
+    print(html)

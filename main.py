@@ -11,3 +11,6 @@ from model.FilmList import FilmList
 # functions.write_lists_to_json(all_lists)
 LISTS_FROM_JSON = functions.read_lists_from_json()
 print(LISTS_FROM_JSON)
+
+firstElement = LISTS_FROM_JSON[0]
+functions.get_movies(firstElement.get('link'))
