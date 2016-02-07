@@ -103,3 +103,5 @@ for movie_obj in movie_obj_list_no_duplicates:
     search_query = movie_obj['title'] + ' ' + year
     imdblink = functions.get_imdb_link(search_query)
     movie_obj['imdb_link'] = imdblink
+
+functions.write_lists_to_json(movie_obj_list_no_duplicates, "imdb.json")
