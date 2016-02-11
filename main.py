@@ -53,7 +53,7 @@ print("Parsing failed for :", len(failed_parsing), " lists")
 
 movie_obj_list = list()
 for movie in sorted_movies:
-    movie_info = re.findall(r'(.+?)\(.*(\d{4}).*\)', movie)
+    movie_info = re.findall(r'(.*?)\(.*(\d{4}).*\)', movie)
 
     movie_obj = None
     if len(movie_info) == 0:
@@ -96,12 +96,61 @@ for movie_obj in movie_obj_list:
 print("Movies to search for: ", len(movie_obj_list_no_duplicates))
 
 for movie_obj in movie_obj_list_no_duplicates:
+    title = movie_obj['title']
+    # print(title)
 
-    year = movie_obj['year']
-    if year == 'N/A':
-        year = ''
-    search_query = movie_obj['title'] + ' ' + year
-    imdblink = functions.get_imdb_link(search_query)
-    movie_obj['imdb_link'] = imdblink
+    movie_info = re.findall(r'\“(.*?)\”', title)
+    if len(movie_info) != 0:
+        movie_obj['title'] = movie_info[0]
+        title = movie_obj['title']
 
-functions.write_lists_to_json(movie_obj_list_no_duplicates, "imdb.json")
+    movie_info = re.findall(r'^(.*?) directed', title)
+    if len(movie_info) != 0:
+        movie_obj['title'] = movie_info[0]
+        title = movie_obj['title']
+
+    movie_info = re.findall(r'^(.*?) dir\.', title)
+    if len(movie_info) != 0:
+        movie_obj['title'] = movie_info[0]
+        title = movie_obj['title']
+        # print(title)
+
+    n = len(title)
+    if n > 0 and title[n - 1] == '–':
+        movie_obj['title'] = title[:n - 1]
+        title = movie_obj['title']
+
+for movie in movie_obj_list_no_duplicates:
+    movie['title'] = movie['title'].strip()
+    if not movie['title']:
+        movie_obj_list_no_duplicates.remove(movie)
+
+movie_obj_list_no_duplicates.sort(key=lambda movie: movie['title'])
+
+final_movies = list()
+previous_movie = {'title': 'test', 'year': 'test'}
+i = -1
+for movie_obj in movie_obj_list_no_duplicates:
+
+    title_ = movie_obj['title']
+    year_ = movie_obj['year']
+
+    if previous_movie['title'] != title_:
+        final_movie = dict()
+        final_movie['title'] = title_
+        final_movie['years'] = list()
+        final_movie['years'].append(year_)
+        final_movies.append(final_movie)
+        i += 1
+    else:
+        if year_ not in final_movies[i]['years']:
+            final_movies[i]['years'].append(year_)
+    previous_movie = movie_obj
+
+i = 0
+for movie_obj in final_movies:
+    print(i, movie_obj)
+    i += 1
+# #   imdblink = functions.get_imdb_link(search_query)
+#     #   movie_obj['imdb_link'] = imdblink
+# # functions.write_lists_to_json(movie_obj_list_no_duplicates, "imdb.json")
