@@ -59,14 +59,47 @@ def get_movies(list_url):
     return movies, other_pages
 
 
-def get_imdb_link(movie):
-    imdb_prefix = 'http://www.imdb'
-    google_search_page = 'http://www.google.ro/search?q='
-    url_encoded_movie = urllib.parse.quote_plus(movie + " imdb")
-    url = google_search_page + url_encoded_movie
+# def get_imdb_link_google(movie):
+#     imdb_prefix = 'http://www.imdb'
+#     google_search_page = 'http://www.google.ro/search?q='
+#     url_encoded_movie = urllib.parse.quote_plus(movie + " imdb")
+#     url = google_search_page + url_encoded_movie
+#     content = get_url_content(url)
+#     tree = html.fromstring(content)
+#     text = tree.xpath('.//ol[@id="rso"]/div[1]/div[1]//cite/text()')
+#     imdb_link = imdb_prefix + text[1]
+#     print("Search for:", movie, "  link:", imdb_link)
+#     return imdb_link
+
+
+def get_imdb_link_fom_omdb(movie, imdb_movies, notfound):
+    title = movie['title']
+    if not title:
+        return
+
+    for year in movie['years']:
+        if year == 'N/A':
+            year = ''
+        json_load = get_movie_json(title, year)
+
+        if json_load['Response'] == 'True':
+            id = json_load['imdbID']
+            imdb_movies[id] = json_load
+        else:
+            if not year:
+                notfound.append(title + "; " + year)
+            else:
+                json_load = get_movie_json(title, '')
+                if json_load['Response'] == 'True':
+                    id = json_load['imdbID']
+                    imdb_movies[id] = json_load
+                else:
+                    notfound.append(title + "; " + year)
+
+
+def get_movie_json(title, year):
+    url = "http://www.omdbapi.com/?" + "t=" + urllib.parse.quote_plus(title) + "&y=" + year + "&r=json"
     content = get_url_content(url)
-    tree = html.fromstring(content)
-    text = tree.xpath('.//ol[@id="rso"]/div[1]/div[1]//cite/text()')
-    imdb_link = imdb_prefix + text[1]
-    print("Search for:", movie, "  link:", imdb_link)
-    return imdb_link
+    json_load = json.loads(content.decode())
+    print(url, json_load['Response'])
+    return json_load

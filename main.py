@@ -148,9 +148,17 @@ for movie_obj in movie_obj_list_no_duplicates:
     previous_movie = movie_obj
 
 i = 0
+movies_imdb = dict()
+notfound = list()
 for movie_obj in final_movies:
-    print(i, movie_obj)
+    # print(i, movie_obj)
     i += 1
-# #   imdblink = functions.get_imdb_link(search_query)
-#     #   movie_obj['imdb_link'] = imdblink
-# # functions.write_lists_to_json(movie_obj_list_no_duplicates, "imdb.json")
+    functions.get_imdb_link_fom_omdb(movie_obj, movies_imdb, notfound)
+# #   movie_obj['imdb_link'] = imdblink
+
+functions.write_lists_to_json(movies_imdb, "imdb.json")
+for title in notfound:
+    print("Not found! " + title)
+print("Total not found:", len(notfound))
+print("Total found:", len(movies_imdb))
+functions.write_lists_to_json(notfound, "not_found.json")
